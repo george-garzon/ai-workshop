@@ -17,7 +17,9 @@
 - **Build:** a FastAPI `POST /chat` endpoint that streams an LLM response.
 
 
-- uv add (package)
+- useful commands
+  - fastapi dev main.py
+  - uv add (package)
 
 
 - Folder Structure
