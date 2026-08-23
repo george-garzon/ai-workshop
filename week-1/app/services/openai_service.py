@@ -1,6 +1,8 @@
 # app/services/openai_service.py
 
 from openai import OpenAI, AsyncOpenAI
+from openai.types.responses import ResponseUsage
+
 from app.core.settings import settings
 
 async def asyncopenai(
@@ -9,14 +11,7 @@ async def asyncopenai(
     model: str = "gpt-5.5",
     retries: int = 5,
     timeout: float = 20.0,
-) -> str | None:
-    async def main():
-        stream = await client.responses.create(
-            model="gpt-5.5",
-            input="Write a one-sentence bedtime story about a unicorn.",
-            stream=True,
-        )
-
+):
     api_key = settings.openai_api_key
     client = AsyncOpenAI(
         api_key=api_key,
@@ -29,20 +24,26 @@ async def asyncopenai(
         instructions=instructions, # instructions="You are a coding assistant that talks like a pirate.",
         input=question, # input="How do I check if a Python object is an instance of a class?",
         stream=True,
+        max_output_tokens=500,
     )
 
-    async for event in response:
-        # Error Handling
-        if event.type == 'error':
-            print(event.error.type)
-            print(event.error.code)
-            print(event.error.event_id)
-            print(event.error.message)
-        # Print everything else normally.
-        print(event)
+    output = ""
+    usage = None
 
-    # asyncio.run(asyncopenai()) # Used in OpenAI GitHub Docs
-    # return response
+    async for event in response:
+        if event.type == "error":
+            raise RuntimeError(event.error.message)
+
+        if event.type == "response.output_text.delta":
+            output += event.delta
+
+        if event.type == "response.completed":
+            usage = event.response.usage
+
+    return {
+        "response": output,
+        "usage": usage,
+    }
 
 
 
@@ -73,6 +74,7 @@ def clientopenai(
         instructions=instructions, # instructions="You are a coding assistant that talks like a pirate.",
         input=question, # input="How do I check if a Python object is an instance of a class?",
         stream=True,
+        max_output_tokens=500,
     )
 
     for event in response:
