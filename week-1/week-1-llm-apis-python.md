@@ -17,6 +17,9 @@
 - **Build:** a FastAPI `POST /chat` endpoint that streams an LLM response.
 
 
+- uv add (package)
+
+
 - Folder Structure
   - **app/api/routes/** — /chat and /health endpoints
   - **app/core/** — settings, secrets, and shared configuration
