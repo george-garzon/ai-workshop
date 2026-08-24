@@ -2,12 +2,13 @@
 
 from openai import OpenAI, AsyncOpenAI
 from openai.types.responses import ResponseUsage
+from app.tools import fetch_cruise, fetch_ship
 
 from app.core.settings import settings
 
 TOOL_REGISTRY = {
-    "search_cruises": search_cruises,
-    "get_ship": get_ship,
+    "search_cruises": fetch_cruise,
+    "get_ship": fetch_ship,
 }
 
 async def asyncopenai(

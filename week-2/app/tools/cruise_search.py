@@ -4,6 +4,7 @@ from app.models.cruise import CruiseArgs
 from app.services.cruise_service import cruise_search, get_cruiseline_id, get_ship_id
 
 async def fetch_cruise(args: CruiseArgs):
+    print("args")
     if not args.cruiseline_id and args.cruiseline:
         args.cruiseline_id = await get_cruiseline_id(args.cruiseline)
 
