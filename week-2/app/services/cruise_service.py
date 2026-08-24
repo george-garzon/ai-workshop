@@ -1,66 +1,74 @@
 # app/services/cruise_service.py
 
-from app.core.settings import settings
-import httpx
-from typing import Any
-
-# Backend API URL
-backend_api_url = settings.backend_api_url
-
-async def request(
-    base_url: str = "http://localhost:8080",
-    endpoint: str = "health",
-    method: str = "GET",
-    params: dict[str, Any] | None = None,
-    data: dict[str, Any] | None = None,
-    headers: dict[str, str] | None = None,
-):
-    url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-
-    async with httpx.AsyncClient() as client:
-        response = await client.request(
-            method=method,
-            url=url,
-            params=params,
-            json=data,
-            headers=headers,
-        )
-
-        response.raise_for_status()
-
-        return response.json()
+from .http_service import request
 
 async def cruise_search(
-    cruiseline: str,
-    ship: str,
-    embarkation_date: str | None,
-    nights: int | str | None
+    cruiseline_id: int | None = None,
+    ship_id: int | None = None,
+    staterooms: str | None = None,
+    page: int = 1,
 ):
-    response = await request(
-        endpoint="cruises",
-        method="POST",
-        params={
-            "cruiseline": cruiseline,
-            "nights": nights,
-            "embarkation_date": embarkation_date,
-            "ship": ship
-        },
-    )
+    params = {
+        "cruiseline": cruiseline_id,
+        "ship": ship_id,
+        "staterooms": staterooms,
+        "page": page,
+    }
 
-    return response
+    # Avoid transmitting ?ship=None or equivalent.
+    params = {key: value for key, value in params.items() if value is not None}
+
+    return await request(
+        endpoint="cruise-market",
+        method="GET",
+        params=params,
+    )
 
 
 async def ship_search(
-        cruiseline: str,
-        ship: str,
+        ship_id: int,
 ):
     response = await request(
-        endpoint="cruises",
-        method="POST",
+        endpoint=f"ships/{ship_id}",
+        method="GET",
         params={
-            "cruiseline": cruiseline,
-            "ship": ship
+            "ship_id": ship_id
         },
     )
 
     return response
+
+async def ship_amenity_search(
+    ship_id: int,
+):
+    response = await request(
+        endpoint=f"ships/amenities/{ship_id}",
+        method="GET",
+    )
+    return response
+
+async def get_ship_id(ship_name: str) -> int:
+    ships = await request(
+        endpoint="ships",
+        method="GET",
+    )
+
+    for ship in ships:
+        if ship["name"].lower() == ship_name.lower():
+            return ship["id"]
+
+    raise ValueError(f"Ship not found: {ship_name}")
+
+async def get_cruiseline_id(cruiseline_name: str) -> int:
+    cruiselines = await request(
+        endpoint="cruiselines",
+        method="GET",
+    )
+
+    for cruiseline in cruiselines:
+        if cruiseline["name"].lower() == cruiseline_name.lower():
+            return cruiseline["id"]
+
+    raise ValueError(
+        f"Cruise line not found: {cruiseline_name}"
+    )

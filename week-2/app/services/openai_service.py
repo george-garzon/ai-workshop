@@ -5,6 +5,11 @@ from openai.types.responses import ResponseUsage
 
 from app.core.settings import settings
 
+TOOL_REGISTRY = {
+    "search_cruises": search_cruises,
+    "get_ship": get_ship,
+}
+
 async def asyncopenai(
     instructions: str,
     question: str,
@@ -29,6 +34,14 @@ async def asyncopenai(
 
     output = ""
     usage = None
+
+    # Use tools to provide response
+    # tool = TOOL_REGISTRY.get(tool_name)
+    #
+    # if not tool:
+    #     raise ValueError(f"Unknown tool: {tool_name}")
+    #
+    # result = await tool(args)
 
     async for event in response:
         if event.type == "error":

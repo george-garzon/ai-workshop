@@ -12,8 +12,7 @@ class CruiseArgs(BaseModel):
     ship: str = Field(
         description="Name of Ship"
     )
-    ship_id: int | None = Field(
-        default=None,
+    ship_id: int = Field(
         description="ID Map of Ship in the database"
     )
     departure_port: str = Field(
@@ -40,4 +39,7 @@ class CruiseArgs(BaseModel):
     )
     suite: str | None = Field(
         description="Cost of a suite stateroom per night, per person"
+    )
+    staterooms: str = Field(
+        description="comma separated value of stateroom types: interior,oceanview,balcony,suite",
     )

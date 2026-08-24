@@ -16,7 +16,8 @@ class Settings(BaseSettings):
 
     # Backend Cruise API
     backend_api_url: str
-    backend_api_key: str
+    backend_api_secret_key: str
+    backend_api_basic_auth: str
 
     # LLM Config
     max_output_tokens: int = 1000
