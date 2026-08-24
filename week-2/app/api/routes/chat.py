@@ -2,7 +2,7 @@
 from logging import exception
 
 from app.schemas import ChatRequest
-from app.services import asyncopenai, clientopenai
+from app.services import asyncopenai
 from fastapi import HTTPException
 
 async def chat(request: ChatRequest):

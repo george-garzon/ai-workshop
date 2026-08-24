@@ -1,6 +1,40 @@
 # app/services/cruise_service.py
 
+import json
+from typing import Any
+
 from .http_service import request
+
+
+def _extract_records(response: Any, *keys: str) -> list[dict[str, Any]]:
+    """Extract a record list from either a list or an API response wrapper."""
+    if isinstance(response, str):
+        response = json.loads(response)
+
+    if isinstance(response, list):
+        records = response
+    elif isinstance(response, dict):
+        records = next(
+            (
+                response[key]
+                for key in keys
+                if isinstance(response.get(key), list)
+            ),
+            None,
+        )
+
+        if records is None:
+            records = next(
+                (value for value in response.values() if isinstance(value, list)),
+                None,
+            )
+    else:
+        records = None
+
+    if records is None or not all(isinstance(record, dict) for record in records):
+        raise ValueError("Backend API did not return a list of records")
+
+    return records
 
 async def cruise_search(
     cruiseline_id: int | None = None,
@@ -48,25 +82,34 @@ async def ship_amenity_search(
     return response
 
 async def get_ship_id(ship_name: str) -> int:
-    ships = await request(
+    response = await request(
         endpoint="ships",
         method="GET",
     )
+    ships = _extract_records(response, "ships", "ship_details", "data")
 
     for ship in ships:
-        if ship["name"].lower() == ship_name.lower():
+        name = ship.get("name") or ship.get("ship_name")
+        if isinstance(name, str) and name.lower() == ship_name.lower():
             return ship["id"]
 
     raise ValueError(f"Ship not found: {ship_name}")
 
 async def get_cruiseline_id(cruiseline_name: str) -> int:
-    cruiselines = await request(
+    response = await request(
         endpoint="cruiselines",
         method="GET",
     )
+    cruiselines = _extract_records(
+        response,
+        "cruiselines",
+        "cruiseline_details",
+        "data",
+    )
 
     for cruiseline in cruiselines:
-        if cruiseline["name"].lower() == cruiseline_name.lower():
+        name = cruiseline.get("name") or cruiseline.get("cruiseline")
+        if isinstance(name, str) and name.lower() == cruiseline_name.lower():
             return cruiseline["id"]
 
     raise ValueError(
