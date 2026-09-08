@@ -32,6 +32,13 @@ async def request(
             headers=request_headers,
         )
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as error:
+            response_detail = response.text[:2000]
+            raise RuntimeError(
+                f"Backend {method} {url} returned {response.status_code}: "
+                f"{response_detail}"
+            ) from error
 
         return response.json()

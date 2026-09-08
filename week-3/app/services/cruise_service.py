@@ -54,19 +54,30 @@ async def document_search():
     return response
 
 
+async def create_document_chunk(data: dict[str, Any]):
+    return await request(
+        endpoint="document-chunks",
+        method="POST",
+        data=data,
+    )
+
 
 async def document_chunk_search(
-        file_id: int,
-):
+    document_id: int,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
     response = await request(
-        endpoint=f"documents/{file_id}",
+        endpoint="document-chunks",
         method="GET",
         params={
-            "file_id": file_id
+            "document_id": document_id,
+            "limit": limit,
+            "offset": offset,
         },
     )
 
-    return response
+    return _extract_records(response, "document_chunks", "data")
 
 async def cruise_search(
     cruiseline_id: int | None = None,

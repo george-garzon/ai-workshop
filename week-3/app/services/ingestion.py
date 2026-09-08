@@ -1,3 +1,5 @@
+import asyncio
+import json
 from typing import Any
 from io import BytesIO
 
@@ -6,6 +8,7 @@ from pypdf import PdfReader
 
 from app.models import DocumentStore
 from app.services.embeddings import create_embeddings
+from app.services.cruise_service import create_document_chunk
 from app.services.text_splitter import split_text
 
 store = DocumentStore()
@@ -52,13 +55,61 @@ async def extract_pdf_text(pdf_url: str) -> str:
         if (text := page.extract_text())
     )
 
-def ingest_document(document_id: int, text: str) -> dict[str, int]:
+def _prepare_chunks(text: str) -> tuple[list[str], list[list[float]]]:
     chunks = split_text(text)
     if not chunks:
         raise ValueError("The document contains no text to ingest")
 
     embeddings = create_embeddings(chunks)
-    embedding_rows = embeddings.cpu().tolist()
+    return chunks, embeddings.cpu().tolist()
+
+
+def hydrate_document_chunks(
+    document_id: int,
+    records: list[dict[str, Any]],
+) -> int:
+    """Load persisted backend chunks into the in-process retrieval store."""
+    ordered_records = sorted(
+        records,
+        key=lambda record: int(record.get("chunk_index", 0)),
+    )
+    chunks: list[str] = []
+    embeddings: list[list[float]] = []
+
+    for record in ordered_records:
+        content = record.get("content")
+        embedding = record.get("embedding")
+
+        if isinstance(embedding, str):
+            embedding = json.loads(embedding)
+
+        if not isinstance(content, str) or not isinstance(embedding, list):
+            raise ValueError(
+                f"Invalid persisted chunk for document {document_id}"
+            )
+
+        chunks.append(content)
+        embeddings.append([float(value) for value in embedding])
+
+    store.chunks.extend(chunks)
+    store.embeddings.extend(embeddings)
+    store.document_ids.extend([document_id] * len(chunks))
+
+    return len(chunks)
+
+
+async def ingest_document(document_id: int, text: str) -> dict[str, int]:
+    chunks, embedding_rows = await asyncio.to_thread(_prepare_chunks, text)
+
+    for chunk_index, (chunk, embedding) in enumerate(
+        zip(chunks, embedding_rows)
+    ):
+        await create_document_chunk({
+            "document_id": document_id,
+            "chunk_index": chunk_index,
+            "content": chunk,
+            "embedding": json.dumps(embedding),
+        })
 
     store.chunks.extend(chunks)
     store.embeddings.extend(embedding_rows)
@@ -67,5 +118,6 @@ def ingest_document(document_id: int, text: str) -> dict[str, int]:
     return {
         "document_id": document_id,
         "chunks_ingested": len(chunks),
+        "chunks_stored": len(chunks),
         "embedding_dimensions": len(embedding_rows[0]),
     }

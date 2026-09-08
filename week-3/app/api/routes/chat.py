@@ -1,6 +1,4 @@
 # app/api/routes/chat.py
-import asyncio
-
 from fastapi import HTTPException
 from app.schemas import ChatRequest
 from app.services import asyncopenai
@@ -47,11 +45,7 @@ async def document_by_id(document_id: int):
 
     text = await extract_pdf_text(pdf_url)
 
-    return await asyncio.to_thread(
-        ingest_document,
-        document_id,
-        text,
-    )
+    return await ingest_document(document_id, text)
 
 async def document():
     document_data = await document_search()
