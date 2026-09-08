@@ -1,12 +1,14 @@
 # app/core/settings.py
-import os
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+PROJECT_DIR = Path(__file__).resolve().parents[2]
+
 class Settings(BaseSettings):
     # App
-    app_name: str = "Week 2 LLM API"
+    app_name: str = "Week 3 LLM API"
     environment: str = "development"
     debug: bool = True
 
@@ -24,7 +26,7 @@ class Settings(BaseSettings):
     temperature: float = 0.7
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=PROJECT_DIR / ".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",

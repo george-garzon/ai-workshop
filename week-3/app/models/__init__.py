@@ -1,7 +1,13 @@
-from .document import Document, DocumentChunk, DocumentStore
+from .document import (
+    DocumentArgs,
+    DocumentByIdArgs,
+    DocumentChunkArgs,
+    DocumentStore,
+)
 
 __all__ = [
-    'Document',
-    'DocumentChunk',
+    'DocumentArgs',
+    'DocumentByIdArgs',
+    'DocumentChunkArgs',
     'DocumentStore'
 ]

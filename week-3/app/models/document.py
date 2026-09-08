@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 
-class Document(BaseModel):
+class DocumentArgs(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     file_id: int = Field(
@@ -16,7 +16,18 @@ class Document(BaseModel):
         description='Only values are `1` for active or `0` for inactive'
     )
 
-class DocumentChunk(BaseModel):
+
+class DocumentByIdArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    document_id: int = Field(
+        description="The record's id field from the document catalog",
+    )
+    query: str = Field(
+        description="The user's question used to retrieve relevant PDF chunks",
+    )
+
+class DocumentChunkArgs(BaseModel):
     file_id: int = Field(
         description='Internal file id of document saved in database',
     )
@@ -29,4 +40,5 @@ class DocumentChunk(BaseModel):
 class DocumentStore:
     def __init__(self):
         self.chunks: list[str] = []
-        self.embeddings: None
+        self.embeddings: list[list[float]] = []
+        self.document_ids: list[int] = []

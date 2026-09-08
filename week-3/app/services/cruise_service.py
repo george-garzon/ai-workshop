@@ -36,18 +36,23 @@ def _extract_records(response: Any, *keys: str) -> list[dict[str, Any]]:
 
     return records
 
-async def document_search(
-        file_id: int,
+async def document_search_by_id(
+        document_id: int,
 ):
-    response = await request(
-        endpoint=f"documents/{file_id}",
+    return await request(
+        endpoint=f"documents/{document_id}",
         method="GET",
-        params={
-            "file_id": file_id
-        },
+    )
+
+async def document_search():
+    # Get All Documents
+    response = await request(
+        endpoint=f"documents",
+        method="GET",
     )
 
     return response
+
 
 
 async def document_chunk_search(
