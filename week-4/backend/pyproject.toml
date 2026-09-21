@@ -1,0 +1,20 @@
+[project]
+name = "week-4-backend"
+version = "0.1.0"
+description = "Local PDF conversation API for the Week 4 knowledge assistant"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+    "openai>=3.3.1",
+    "pydantic-settings>=2.15.0",
+    "python-multipart>=0.0.22",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
