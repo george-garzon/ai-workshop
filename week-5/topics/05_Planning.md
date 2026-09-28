@@ -1,0 +1,1 @@
+Planning is when a model breaks a goal into steps.

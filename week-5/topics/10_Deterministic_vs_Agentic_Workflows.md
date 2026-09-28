@@ -1,0 +1,1 @@
+Deterministic workflows are fixed steps, whereas agentic flows allow the model to choose the next step.

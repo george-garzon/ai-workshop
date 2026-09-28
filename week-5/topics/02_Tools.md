@@ -1,0 +1,1 @@
+Tools are functions the model can call to do things it can't do itself, like querying SQL or calling an API.

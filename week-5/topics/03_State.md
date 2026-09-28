@@ -1,0 +1,1 @@
+State is the current working data, the current step, tool results, errors and so on.
