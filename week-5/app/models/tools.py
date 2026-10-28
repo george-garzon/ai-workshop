@@ -23,7 +23,7 @@ Then try a missing account_id, an unknown extra field, and a blank string.
 Each invalid case must fail before the account lookup function can run.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SearchKnowledgeBaseArgs(BaseModel):
@@ -32,8 +32,7 @@ class SearchKnowledgeBaseArgs(BaseModel):
     Example: {"query": "refund policy"}. The tool receives this model instance,
     so its implementation will read a named attribute instead of guessing keys.
     """
-
-    pass
+    query: str = Field(default="refund policy")
 
 
 class LookupAccountArgs(BaseModel):
@@ -43,7 +42,7 @@ class LookupAccountArgs(BaseModel):
     zeros and nonnumeric prefixes are preserved.
     """
 
-    pass
+    account_id: str = Field(default="demo-001", description="{'account_id': 'demo-001'")
 
 
 class SendMessageArgs(BaseModel):
@@ -52,5 +51,6 @@ class SendMessageArgs(BaseModel):
     Use a fake recipient such as learner@example.test for exercises. Valid text
     does not establish permission to send; approval belongs in services/approval.py.
     """
-
-    pass
+    recipient: str = Field(default="learner@example.test", description="persons email")
+    subject: str = Field(default="test", description="subject of the email")
+    body: str = Field(default="this is the body", description="email body")

@@ -23,8 +23,8 @@ An unknown action should fail. A tool action without a tool_call should fail.
 Two new states must not share observations. Explain why observations contain
 tool results while AgentRunResponse.steps describes the run for a client.
 """
-
-from pydantic import BaseModel
+from typing import Literal
+from pydantic import BaseModel, Field
 
 
 class ToolCall(BaseModel):
@@ -37,7 +37,8 @@ class ToolCall(BaseModel):
     A correctly shaped ToolCall is only a proposal, not permission to execute.
     """
 
-    pass
+    name: str
+    arguments: dict[str,str]
 
 
 class AgentDecision(BaseModel):
@@ -54,7 +55,13 @@ class AgentDecision(BaseModel):
     approval itself. Application policy must also check ordinary tool actions.
     """
 
-    pass
+    action: Literal["tool", "final", "approval_required"] = Field(
+        default="final",
+        description="The action to perform"
+    )
+    final_answer: str | None = Field(default=None)
+    tool_call: ToolCall | None = Field(default=None)
+    reason: str | None = Field(default=None)
 
 
 class AgentState(BaseModel):
@@ -71,8 +78,11 @@ class AgentState(BaseModel):
     choose to store it here instead, document that decision consistently.
     """
 
-    pass
-
+    instructions: str
+    question: str
+    iteration: int = Field(ge=0)
+    observations: dict
+    pending_approval: ToolCall | None = Field(default=None)
 
 class ToolExecutionResult(BaseModel):
     """TODO: provide one consistent result shape for every tool.
@@ -85,4 +95,6 @@ class ToolExecutionResult(BaseModel):
     with no output. Never disguise a failed tool as an empty successful result.
     """
 
-    pass
+    tool_name: str
+    output: str | None = Field(default=None)
+    error: str | None = Field(default=None)

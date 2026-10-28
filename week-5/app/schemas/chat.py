@@ -26,7 +26,7 @@ shape. Empty model shells currently accept no defined fields; they are not a
 finished validation contract.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AgentRunRequest(BaseModel):
@@ -38,8 +38,8 @@ class AgentRunRequest(BaseModel):
 
     Example values: "Use tools when useful" and "Look up account demo-001".
     """
-
-    pass
+    instructions: str
+    question: str
 
 
 class AgentStep(BaseModel):
@@ -55,8 +55,12 @@ class AgentStep(BaseModel):
     Give optional fields a default of None. A nullable type alone does not make
     a field optional to provide. Record failures as well as successful tools.
     """
-
-    pass
+    iteration: int = Field(default=1)
+    action: str | None = Field(default=None)
+    tool_name: str | None = Field(default=None)
+    tool_arguments: dict | None = Field(default=None)
+    observation: str | None = Field(default=None)
+    error: str | None = Field(default=None)
 
 
 class AgentRunResponse(BaseModel):
@@ -68,5 +72,5 @@ class AgentRunResponse(BaseModel):
     Example: a lookup followed by a final answer should show both attempts in
     steps. Approval denial and iteration-limit exits should retain prior steps.
     """
-
-    pass
+    response: str = Field(default='response')
+    steps: list

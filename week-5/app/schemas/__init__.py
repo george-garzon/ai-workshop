@@ -11,3 +11,6 @@ here, learn how imports and __all__ work before updating the callers.
 Check: reading the three public schemas should be enough to explain the JSON
 accepted by POST /api/agent and the answer/steps JSON it returns.
 """
+from .chat import AgentStep, AgentRunRequest, AgentRunResponse
+
+__all__ = ['AgentStep','AgentRunResponse','AgentRunRequest']
