@@ -1,3 +1,8 @@
+# Purpose: declare this week's environment, project metadata, and dependencies.
+# Keep this setup while rebuilding app/. Removing it would turn each exercise
+# into an environment-repair task instead of an agent-programming task.
+# Your task: learn what each dependency supplies, then add packages only when a
+# feature actually requires them. Run commands from week-5 to select this project.
 [project]
 name = "week-5"
 version = "0.1.0"
@@ -8,16 +13,23 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    # HTTP application, routes, request validation, and generated API docs.
     "fastapi>=0.141.1",
+    # Model provider client; only services/openai_service.py should need it.
     "openai>=3.3.1",
+    # Typed configuration loaded from environment variables and .env.
     "pydantic-settings>=2.15.0",
+    # Support for reading .env files; never put real keys in this TOML file.
     "python-dotenv>=1.2.3",
+    # ASGI server that serves the FastAPI app; used by the README run command.
     "uvicorn[standard]>=0.52.4",
 ]
 
+# Build backend metadata. You do not need to write packaging code for this app.
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
 
 [tool.uv]
+# Work directly from this directory rather than installing this app as a package.
 package = false
